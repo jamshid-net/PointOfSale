@@ -1,0 +1,150 @@
+﻿@page "/waiters"
+@using Manager.Application.Handlers;
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Domain.Models;
+
+
+
+
+<h3>WaiterPage</h3>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Waiter Id</th>
+            <th>Waiter Name</th>
+            <th>Waiter Phone</th>
+            <th>
+               <td>
+                    <button class="btn btn-primary" @onclick="() => AddOrder()">Add Waiter</button>
+               </td>
+             </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var waiter in waiters)
+        {
+                <tr>
+                    <td>@waiter.WaiterId</td>
+                    <td>@waiter.WaiterName</td>
+                    <td>@waiter.Phone</td>
+                    
+                    <td><button class="btn btn-danger" onclick="@(() => RemoveOrder(waiter))">Remove</button></td>
+                    <td>
+                        <button class="btn btn-primary" @onclick="() => EditOrder(waiter)">Edit</button> 
+                    </td>
+                </tr>
+        }
+    </tbody>
+</table>
+
+@if (selectedOrder != null)
+{
+        <h3>Edit Order</h3>
+
+        <div class="form-group">
+            <label for="OrderTable">Waiter Name</label>
+            <input type="text" class="form-control" id="OrderTable" @bind="@selectedOrder.WaiterName" />
+        </div>
+
+        <div class="form-group">
+            <label for="isCompleted">Waiter Phone</label>
+            <input type="text" class="form-control" id="isCompleted" @bind="@selectedOrder.Phone" />
+        </div>
+            
+        <div class="form-group mt-2">
+            <button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+        </div>
+
+}
+
+
+@if (addOrder != null)
+{
+            <h3>Add Waiter</h3>
+
+            <div class="form-group">
+                <label for="OrderTable">Waiter Name:</label>
+                        <input type="text" class="form-control" id="OrderTable" @bind="@addOrder.WaiterName" />
+            </div>
+
+            <div class="form-group">
+                <label for="isCompleted">Waiter Phone:</label>
+                <input type="text" class="form-control" id="isCompleted" @bind="@addOrder.Phone" />
+            </div>
+                 <div class="form-group">
+                    <label for="isCompleted">Waiter Password:</label>
+                    <input type="text" class="form-control" id="isCompleted" @bind="@addOrder.Password" />
+                </div>
+            <div class="form-group mt-2">
+                    <button class="btn btn-primary" @onclick="AddChanges">Save Changes</button>
+            </div>
+}
+
+@code {
+
+    public List<Waiter> waiters = new();
+    private Waiter selectedOrder;
+    private Waiter addOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IWaiterRepository waiterRepository = new WaiterRepo();
+        IWaiterHandler waiterHandler = new WaiterHandler(waiterRepository);
+        waiters = await waiterHandler.GetAllWaitersAsync();
+    }
+
+    public async void RemoveOrder(Waiter waiter)
+    {
+
+        IWaiterRepository waiterRepository = new WaiterRepo();
+        IWaiterHandler waiterHandler = new WaiterHandler(waiterRepository);
+        await waiterHandler.DeleteWaiterByIdAsync(waiter.WaiterId);
+
+        waiters.Remove(waiter);
+
+        StateHasChanged();
+    }
+
+
+    private void EditOrder(Waiter waiter)
+    {
+        selectedOrder = waiter;
+    }
+
+    private async Task SaveChanges()
+    {
+        IWaiterRepository waiterRepository = new WaiterRepo();
+        IWaiterHandler waiterHandler = new WaiterHandler(waiterRepository);
+        await waiterHandler.UpdateWaiterAsync(selectedOrder);
+
+        selectedOrder = null;
+    }
+
+    public void AddOrder()
+    {
+        var addOrder1 = new Waiter()
+        {
+            WaiterName = "Waiter name",
+            Phone = "Waiter phone",
+            Password = "Password"
+        };
+        waiters.Add(addOrder1);
+
+        addOrder = addOrder1;
+
+    }
+
+    public async void AddChanges()
+    {
+        IWaiterRepository waiterRepository = new WaiterRepo();
+        IWaiterHandler waiterHandler = new WaiterHandler(waiterRepository);
+        await waiterHandler.InsertWaiterAsync(addOrder);
+
+        addOrder = null;
+
+    }
+
+}

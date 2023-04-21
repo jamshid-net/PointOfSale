@@ -1,0 +1,72 @@
+﻿<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">BarManager.Blazor</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+
+         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="products">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Products
+            </NavLink>
+        </div>
+         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="orders">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Orders
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="categories">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Categories
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="waiterOrder">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> WaiterOrders
+            </NavLink>
+        </div>
+         <div class="nav-item px-3">
+            <NavLink class="nav-link" href="productcart">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Product Cart
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="waiters">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Waiter 
+            </NavLink>
+        </div>
+        @*<div class="nav-item px-3">
+            <NavLink class="nav-link" href="orderProduct">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Order Product 
+            </NavLink>
+        </div>*@
+        
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="topfoods">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Top Food
+            </NavLink>
+        </div>  
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="kitchen">
+                <span class="oi oi-list-rich" aria-hidden="true"></span> Kitchen
+            </NavLink>
+        </div>
+        
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

@@ -1,0 +1,99 @@
+﻿@page "/orders"
+@using Manager.Application.Handlers;
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Domain.Models;
+
+
+
+<h3>Orders Page</h3>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Order Id</th>
+            <th>Order Table</th>
+            <th>Order Date</th>
+            <th>IsCompleted</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var order in orders)
+        {
+            <tr>
+                <td>@order.OrderId</td>
+                <td>@order.OrderTable</td>
+                <td>@order.OrderDate</td>
+                <td>@order.IsCompleted</td>
+               
+                <td><button class="btn btn-danger" onclick="@(() => RemoveOrder(order))">Remove</button></td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => EditOrder(order)">Edit</button> 
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (selectedOrder != null)
+{
+    <h3>Edit Order</h3>
+
+    <div class="form-group">
+        <label for="OrderTable">Order Table:</label>
+        <input type="text" class="form-control" id="OrderTable" @bind="@selectedOrder.OrderTable" />
+    </div>
+
+    <div class="form-group">
+        <label for="isCompleted">Is Completed:</label>
+        <input type="checkbox" id="isCompleted" @bind="@selectedOrder.IsCompleted" />
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+    </div>
+
+}
+
+
+@code {
+    public List<Order>  orders =  new();
+    private Order selectedOrder;
+    private Order addOrder;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IOrdersRepository orderRepository = new OrdersRepo();
+        IOrdersHandler orderHandler = new OrdersHandler(orderRepository);
+        orders = await orderHandler.GetAllOrdersAsync();
+    }
+
+    public async void RemoveOrder(Order order)
+    {
+
+        IOrdersRepository orderRepository = new OrdersRepo();
+        IOrdersHandler orderHandler = new OrdersHandler(orderRepository);
+        await orderHandler.DeleteByIdOrdersAsync(order.OrderId);
+
+        orders.Remove(order);
+
+        StateHasChanged();
+    }
+
+    private void EditOrder(Order order)
+    {
+        selectedOrder = order;
+    }
+
+    private async Task SaveChanges()
+    {
+        IOrdersRepository orderRepository = new OrdersRepo();
+        IOrdersHandler orderHandler = new OrdersHandler(orderRepository);
+        await orderHandler.UpdateOrdersAsync(selectedOrder);
+
+        selectedOrder = null;
+    }
+
+   
+    
+}

@@ -1,0 +1,129 @@
+﻿@page "/kitchen"
+
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Domain.Models;
+@using Manager.Infrastructure.Repositories.Views;
+
+<h2>Kitchen</h2>
+
+<div class="container">
+    <div class="row">
+        @foreach (var group in kitchenViews.GroupBy(k => k.OrderId))
+        {
+            <div style="min-width:200px" class="col-lg-3 col-md-4 col-sm-6 mb-5">
+
+                <div class="card  @GetCardBgColor(group.Key)">
+                    <div class="card-header  d-flex justify-content-between">
+                        <h5 class="card-title">Order ID: @group.Key </h5>
+                        <h5 class="card-title">@GetCardStatus(group.Key)</h5>
+                    </div>
+                    <div  class="bg-warning text-dark" style="padding-left:18px"> Order Date: @DateTime.Now</div>
+                    <ul class="list-group  list-group-flush">
+                        
+                        @foreach (var item in group)
+                        {
+                            <li class="list-group-item @GetCardBgColor(group.Key) d-flex justify-content-between align-items-center">
+                                <div>
+                                    <p class="card-text">@item.ProductName: @item.ProductCount</p>
+                                </div>
+                                
+                            </li>
+                        }
+                    </ul>
+                    <div class="card-footer d-flex justify-content-between">
+                        
+                        <button type="button" class="btn btn-warning @GetBtnStats(group.Key)" @onclick="() => ToggleInProcess(group.Key)">In Process</button>
+                        <button type="button" class="btn @FinishBtnStats(group.Key)" @onclick="()=> FinishedClicked(group.Key)">Finished</button>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+
+
+
+
+
+@code {
+    List<KitchenView> kitchenViews = new List<KitchenView>();
+
+    protected override async Task OnInitializedAsync()
+    {
+        kitchenViews = await new GetKitchenOrder().GetKichenViews();
+        StateHasChanged();
+
+    }
+
+
+    //-------------------------------------------//
+
+    Dictionary<int, string> statusDict = new Dictionary<int, string>();
+    int selectedOrderId = -1;
+    async Task FinishedClicked(int orderId)
+    {
+        await new GetKitchenOrder().DeleteKitchenOrder(orderId);
+        kitchenViews.RemoveAll(x=>x.OrderId==orderId);
+        StateHasChanged();
+    }
+    void ToggleInProcess(int orderId)
+    {
+        if (statusDict.ContainsKey(orderId))
+        {
+            statusDict[orderId] = "In Process";
+        }
+        else
+        {
+            statusDict.Add(orderId, "In Process");
+        }
+        StateHasChanged();
+    }
+    string FinishBtnStats(int orderId)
+    {
+        if (statusDict.ContainsKey(orderId))
+        {
+            return "btn-danger btn-lg btn-block";
+        }
+        else
+        {
+            return "btn-success";
+        }
+    }
+    string GetCardStatus(int orderId)
+    {
+        if (statusDict.ContainsKey(orderId))
+        {
+            return statusDict[orderId];
+        }
+        else
+        {
+            return "New Order";
+        }
+    }
+    string GetBtnStats(int orderId)
+    {
+        if (statusDict.ContainsKey(orderId))
+        {
+            return "d-none";
+        }
+        else
+        {
+            return "";
+        }
+    }
+    string GetCardBgColor(int orderId)
+    {
+        if (statusDict.ContainsKey(orderId) && statusDict[orderId] == "In Process")
+        {
+            return "bg-primary text-white";
+        }
+        else
+        {
+            return "bg-danger text-white";
+        }
+    }
+
+}

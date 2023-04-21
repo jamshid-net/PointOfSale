@@ -1,0 +1,102 @@
+﻿@page "/waiterOrder"
+@using Manager.Application.Handlers;
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Domain.Models;
+
+
+
+
+<h3>WaiterOrderPage</h3>
+
+ <table class="table">
+    <thead>
+        <tr>
+            <th>Id </th>
+            <th>Waiter </th>
+            <th>Order </th>
+             
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var waiterOrder in waiterOrders)
+        {
+                <tr>
+                    <td>@waiterOrder.Id </td>
+                    <td>@waiterOrder.Waiter.WaiterId</td>
+                    <td>@waiterOrder.Order.OrderId</td>
+                   
+                        <td width="150px"><button class="btn btn-danger" onclick="@(() => RemoveWaiterOrder(waiterOrder))">Remove</button></td>
+                    <td width="100px">
+                        <button class="btn btn-primary" @onclick="() => EditWaiterOrder(waiterOrder)">Edit</button>
+                    </td>
+                </tr>
+        }
+    </tbody>
+</table>
+
+
+@if (selectedWiterOrders != null)
+{
+        <h3>Edit WaiterOrder</h3>
+
+        <div class="form-group">
+                    <label for="Waiter">Waiter:</label>
+                <input type="text" class="form-control" id="Waiter" @bind="@selectedWiterOrders.Waiter.WaiterId" />
+        </div>
+
+        <div class="form-group">
+                <label for="isCompleted">Order:</label>
+                    <input type="text" class="form-control" id="isCompleted" @bind="@selectedWiterOrders.Order.OrderId" />
+        </div>
+       
+        <div class="form-group">
+            <button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+        </div>
+}
+
+@code {
+    public List<WaiterOrder> waiterOrders = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IWaiterOrderRepository waiterOrderRepository = new WaiterOrderRepo();
+        IWaiterOrderHandler waiterOrderHandler = new WaiterOrderHandlar(waiterOrderRepository);
+        waiterOrders = await waiterOrderHandler.GetAllWaiterOrderAsync();
+    }
+    //Birinchi Page Delete Update
+    public async void RemoveWaiterOrder(WaiterOrder waiterOrder)
+    {
+        IWaiterOrderRepository waiterOrderRepository = new WaiterOrderRepo();
+        IWaiterOrderHandler waiterOrderHandler = new WaiterOrderHandlar(waiterOrderRepository);
+
+        await waiterOrderHandler.DeleteByIdWaiterOrderAsync(waiterOrder.Id);
+
+        waiterOrders.Remove(waiterOrder);
+
+        StateHasChanged();
+
+    }
+    private WaiterOrder selectedWiterOrders;
+    private WaiterOrder addWaiterOrder;
+    private void EditWaiterOrder(WaiterOrder waiterOrder)
+    {
+        selectedWiterOrders = waiterOrder;
+        
+    }
+
+    private async Task SaveChanges()
+    {
+        IWaiterOrderRepository waiterOrderRepository = new WaiterOrderRepo();
+        IWaiterOrderHandler waiterOrderHandler = new WaiterOrderHandlar(waiterOrderRepository);
+        await waiterOrderHandler.UpdateWaiterOrderAsync(selectedWiterOrders);
+
+        selectedWiterOrders = null;
+    }
+    //Tugadi 
+
+
+}
+

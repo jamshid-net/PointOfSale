@@ -1,0 +1,46 @@
+﻿@page "/topfoods" 
+@inject IJSRuntime JSRuntime
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Handlers;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Application.BusinesLogics.Models;
+@using System.Text.Json
+
+
+<h3>Foods</h3>
+<div class="table-responsive">
+    <table class="table table-striped table-bordered table-secondary">
+        <thead class="thead-dark">
+            <tr>
+                <th>Food Name</th>
+                <th>Price</th>
+                <th>Sold Count</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var food in Foods)
+            {
+                <tr>
+                    <td>@food.FoodName</td>
+                    <td>@food.Price</td>
+                    <td>@food.SoldCount</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code{
+    GetTopFood getTopFood = new GetTopFood();
+    List<Food> Foods = new List<Food>();
+    protected async override Task OnInitializedAsync()
+    {
+        Foods = await getTopFood.GetTopFoods();
+        StateHasChanged();
+    }
+   
+   
+   
+}

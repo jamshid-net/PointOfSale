@@ -1,0 +1,195 @@
+﻿@page "/products"
+@using Manager.Application.Handlers;
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Domain.Models;
+@inject IJSRuntime JSRuntime; 
+
+
+
+
+
+<h3>ProductsPage</h3>
+<table class="table table-light table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Product Id</th>
+            <th>Category</th>
+            <th>Product Name</th>
+            <th>Product Price</th>
+            <th>Product Description</th>
+            <th>Product Picture</th>
+            <th><button class="btn btn-success" @onclick="(()=> AddProduct())">Add</button> </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var product in products)
+        {
+            <tr>
+                <td>@product.ProductId</td>
+                <td>@product.Category.CategoryName</td>
+                <td>@product.ProductName</td>
+                <td>@product.ProductPrice</td>
+                <td>@product.ProductDescription</td>
+                <td><img width="50px" height="50px" src="@product.ProductPicture" alt="@product.ProductName" /></td>
+                <td><button class="btn btn-danger" onclick="@(() => RemoveProduct(product))">Remove</button></td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => EditProduct(product)">Edit</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+<button class="btn btn-info" @onclick="()=>ShowPrompt()">Test Promt</button>
+
+@if (selectedProduct != null)
+{
+    <h3>Edit Product</h3>
+    <div class="form-group">
+        <label for="productDescription">Category id:</label>
+        <textarea class="form-control" id="productDescription" @bind="@selectedProduct.Category.CategoryID"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="productName">Product Name:</label>
+        <input type="text" class="form-control" id="productName" @bind="@selectedProduct.ProductName" />
+    </div>
+    <div class="form-group">
+        <label for="productPrice">Product Price:</label>
+        <input type="number" class="form-control" id="productPrice" @bind="@selectedProduct.ProductPrice" />
+    </div>
+    <div class="form-group">
+        <label for="productDescription">Product Description:</label>
+        <textarea class="form-control" id="productDescription" @bind="@selectedProduct.ProductDescription"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="productDescription">Product picture link:</label>
+        <textarea class="form-control" id="productDescription" @bind="@selectedProduct.ProductPicture"></textarea>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+    </div>
+}
+@if (newComingProduct != null)
+{
+    <h3>New Product</h3>
+    <div class="form-group">
+        <label for="productDescription">Category id:</label>
+        <textarea class="form-control" id="productDescription" @bind="@newComingProduct.Category.CategoryID"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="productName">Product Name:</label>
+        <input type="text" class="form-control" id="productName" @bind="@newComingProduct.ProductName" />
+    </div>
+    <div class="form-group">
+        <label for="productPrice">Product Price:</label>
+        <input type="number" class="form-control" id="productPrice" @bind="@newComingProduct.ProductPrice" />
+    </div>
+    <div class="form-group">
+        <label for="productDescription">Product Description:</label>
+        <textarea class="form-control" id="productDescription" @bind="@newComingProduct.ProductDescription"></textarea>
+    </div>
+    <div class="form-group">
+        <label for="productDescription">Product picture link:</label>
+        <textarea class="form-control" id="productDescription" @bind="@newComingProduct.ProductPicture"></textarea>
+    </div>
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="SaveAddedProduct">Save Changes</button>
+    </div>
+}
+
+
+
+@code {
+
+
+    private string myMessage = "Hello from prompt!";
+
+    private async Task ShowPrompt()
+    {
+        string message = await JSRuntime.InvokeAsync<string>("prompt", "Enter your age");
+        if (!string.IsNullOrEmpty(message))
+        {
+            await JSRuntime.InvokeVoidAsync("alert", "Your age is "+ message);
+        }
+    }
+
+
+
+
+    //---------
+    public List<Product> products = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IProductRepository productRepository = new ProductsRepo();
+        IProductHandler productHandler = new ProductsHandler(productRepository);
+
+        products = await productHandler.GetAllProductsAsync();
+
+    }
+
+    public async void RemoveProduct(Product product)
+    {
+
+        IProductRepository productRepository = new ProductsRepo();
+        IProductHandler productHandler = new ProductsHandler(productRepository);
+        await productHandler.DeleteByIdProductAsync(product.ProductId);
+
+        products.Remove(product);
+
+        StateHasChanged();
+    }
+    private Product selectedProduct;
+    private Product newComingProduct;
+
+    private void EditProduct(Product product)
+    {
+        selectedProduct = product;
+    }
+
+    private async Task SaveChanges()
+    {
+
+
+        IProductRepository productRepository = new ProductsRepo();
+        IProductHandler productHandler = new ProductsHandler(productRepository);
+        await productHandler.UpdateProductAsync(selectedProduct);
+
+
+        selectedProduct = null;
+    }
+
+    private async Task SaveAddedProduct()
+    {
+        IProductRepository productRepository = new ProductsRepo();
+        IProductHandler productHandler = new ProductsHandler(productRepository);
+        await productHandler.InsertProductAsync(newComingProduct);
+        newComingProduct = null;
+
+    }
+    private void AddProduct()
+    {
+        // Create a new instance of Product with default values
+        var newProduct = new Product()
+            {
+                Category = new Category()
+                {
+                    CategoryID = 1,
+                    CategoryName = "New Category"
+                },
+                ProductName = "New Product",
+                ProductPrice = 0,
+                ProductDescription = "",
+                ProductPicture = ""
+            };
+
+        products.Add(newProduct);
+
+        
+        newComingProduct = newProduct;
+    }
+
+}

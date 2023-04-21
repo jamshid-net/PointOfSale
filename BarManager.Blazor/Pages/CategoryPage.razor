@@ -1,0 +1,120 @@
+﻿@page "/categories"
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Handlers;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Domain.Models;
+<body class="page-background-class">
+<h3>Categories</h3>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Category Id</th>
+            <th>Category Name</th>
+            <th><button class="btn btn-success" @onclick="(()=> AddProduct())">Add</button> </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var category in categories)
+        {
+            <tr>
+                <td width="300px">@category.CategoryID</td>
+                <td width="500px">@category.CategoryName</td>
+                <td>
+                    <button class="btn btn-danger" onclick="@(() => RemoveCategory(category))">Remove</button>
+                </td>
+                <td>
+                    <button class="btn btn-primary" @onclick="() => EditCategory(category)">Edit</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+@if (selectedCategory != null)
+{
+    <h3>Edit Product</h3>
+
+    <div class="from-group">
+        <label for="categoryName">Category Name:</label>
+        <input type="text" class="from-control" id="categoryName" @bind="@selectedCategory.CategoryName" />
+    </div>
+
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+    </div>
+}
+
+@if (newComingCategory != null)
+{
+    <h3>New Product</h3>
+    <div class="form-group">
+        <label for="productDescription">Category name:</label>
+        <textarea class="form-control" id="productDescription" @bind="@newComingCategory.CategoryName"></textarea>
+    </div>
+    
+    <div class="form-group">
+        <button class="btn btn-primary" @onclick="SaveAddedProduct">Save Changes</button>
+    </div>
+}
+</body>
+@code {
+    public List<Category> categories = new();
+    protected override async Task OnInitializedAsync()
+    {
+        ICategoryRepository categoryRepository = new CategoryRepo();
+        ICategoryHandler categoryHandler = new CategoryHandler(categoryRepository);
+        categories = await categoryHandler.GetAllCategoriesAsync();
+    }
+
+    public async void RemoveCategory(Category category)
+    {
+        ICategoryRepository categoryRepository = new CategoryRepo();
+        ICategoryHandler categoryHandler = new CategoryHandler(categoryRepository);
+
+        await categoryHandler.DeleteCategoryByIdAsync(category.CategoryID);
+        categories.Remove(category);
+        StateHasChanged();
+    }
+
+    private async Task SaveAddedProduct()
+    {
+        ICategoryRepository categoryRepository = new CategoryRepo();
+        ICategoryHandler categoryHandler = new CategoryHandler(categoryRepository);
+        await categoryHandler.InsertCategoryAsync(newComingCategory);
+        newComingCategory = null;
+
+    }
+
+    private Category selectedCategory;
+    private Category newComingCategory;
+
+    private void EditCategory(Category category)
+    {
+        selectedCategory = category;
+    }
+
+    private async Task SaveChanges()
+    {
+        ICategoryRepository categoryRepository = new CategoryRepo();
+        ICategoryHandler categoryHandler = new CategoryHandler(categoryRepository);
+        await categoryHandler.UpdateCategoryAsync(selectedCategory);
+
+        selectedCategory = null;
+    }
+
+    private void AddProduct()
+    {
+        // Create a new instance of Product with default values
+        var newCategory = new Category()
+            {
+                CategoryName = "New Category"
+            };
+
+        categories.Add(newCategory);
+
+
+        newComingCategory = newCategory;
+    }
+
+}

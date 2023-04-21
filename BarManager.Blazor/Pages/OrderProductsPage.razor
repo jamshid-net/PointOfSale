@@ -1,0 +1,104 @@
+﻿@page "/orderProduct"
+@using Manager.Application.Handlers;
+@using Manager.Infrastructure.Repositories.Models;
+@using Manager.Application.Handler.Interfaces;
+@using Manager.Application.Repository.Interfaces;
+@using Manager.Domain.Models;
+
+
+
+
+<h3>OrderProductsPage</h3>
+
+<table class="table table-striped table-bordered">
+    <thead>
+        <tr>
+            <th>Id </th>
+            <th>OrderId </th>
+            <th>ProductId </th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var orderProduct in orderProducts)
+        {
+                    <tr>
+                        <td>@orderProduct.Id </td>
+                        <td>@orderProduct.Order.OrderId</td>
+                        <td>@orderProduct.Product.ProductId</td>
+
+                        <td width="150px">
+                            <button class="btn btn-danger" onclick="@(() => RemoveWaiterOrder(orderProduct))">Remove</button>
+                        </td>
+                        <td width="100px">
+                            <button class="btn btn-primary" @onclick="() => EditWaiterOrder(orderProduct)">Edit</button>
+                        </td>
+                    </tr>
+        }
+    </tbody>
+</table>
+
+
+@if (selectedOrderProduct != null)
+{
+            <h3>Edit WaiterOrder</h3>
+
+            <div class="form-group">
+                        <label for="Waiter">Waiter:</label>
+                    <input type="text" class="form-control" id="Waiter" @bind="@selectedOrderProduct.Order.OrderId" />
+            </div>
+
+            <div class="form-group">
+                    <label for="isCompleted">Order:</label>
+                        <input type="text" class="form-control" id="isCompleted" @bind="@selectedOrderProduct.Product.ProductId" />
+            </div>
+
+            <div class="form-group">
+                <button class="btn btn-primary" @onclick="SaveChanges">Save Changes</button>
+            </div>
+}
+
+@code {
+    public List<OrderProduct> orderProducts = new();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        IOrderProductRepository orderProductRepository = new OrderProductsRepo();
+        IOrderProductHandler orderProductHandler = new OrderProductHandler(orderProductRepository);
+        orderProducts = await orderProductHandler.GetAllOrderProductAsync();
+    }
+    
+    public async void RemoveWaiterOrder(OrderProduct orderProduct)
+    {
+        IOrderProductRepository orderProductRepository = new OrderProductsRepo();
+        IOrderProductHandler orderProductHandler = new OrderProductHandler(orderProductRepository);
+
+        await orderProductHandler.DeleteOrderProductByIdAsync(orderProduct.Id);
+
+        orderProducts.Remove(orderProduct);
+
+        StateHasChanged();
+
+    }
+    private OrderProduct selectedOrderProduct;
+    private OrderProduct addOrderProduct;
+    private void EditWaiterOrder(OrderProduct orderProduct)
+    {
+        selectedOrderProduct = orderProduct;
+
+    }
+
+    private async Task SaveChanges()
+    {
+        IOrderProductRepository orderProductRepository = new OrderProductsRepo();
+        IOrderProductHandler orderProductHandler = new OrderProductHandler(orderProductRepository);
+
+        await orderProductHandler.UpdateOrderProductAsync(selectedOrderProduct);
+
+        selectedOrderProduct = null;
+    }
+    
+
+
+}

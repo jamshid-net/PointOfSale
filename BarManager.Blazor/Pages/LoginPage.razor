@@ -1,0 +1,63 @@
+﻿
+@page "/login"
+@inherits LayoutComponentBase
+@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.Routing
+@using System.Security.Claims 
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
+
+<h3>Login</h3>
+
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-body">
+                    <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <InputText id="email" class="form-control" @bind-Value="@loginModel.Email" />
+                            <ValidationMessage For="@(() => loginModel.Email)" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <InputText id="password" class="form-control" @bind-Value="@loginModel.Password" type="password" />
+                            <ValidationMessage For="@(() => loginModel.Password)" />
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block mt-4">Login</button>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new LoginModel();
+    private string errorMessage;
+
+    private async Task HandleLogin()
+    {
+        if (loginModel.Email == "1234" && loginModel.Password == "1234")
+        {
+            
+            
+            NavigationManager.NavigateTo("/products");
+        }
+        else
+        {
+            errorMessage = "Invalid email or password";
+        }
+    }
+
+    private class LoginModel
+    {
+        
+        public string Email { get; set; }
+
+        public string Password { get; set; }
+    }
+}
