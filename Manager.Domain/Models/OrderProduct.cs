@@ -14,7 +14,7 @@ namespace Manager.Domain.Models
 
         public override string ToString()
         {
-            return $"Id: {Id}, Order: {Order}, Product: {Product}";
+            return $"Id: {Id}, Order: {Order} ; Product: {Product}";
         }
     }
 }
