@@ -12,5 +12,6 @@ namespace Manager.Domain.Models
         public Waiter Waiter { get; set; }
         public Order Order { get; set; }  
         public int Age {get;set;}
+        public string PinCode {get;set;}
     }
 }
