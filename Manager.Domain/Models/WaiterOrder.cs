@@ -11,6 +11,6 @@ namespace Manager.Domain.Models
         public int Id { get; set; }
         public Waiter Waiter { get; set; }
         public Order Order { get; set; }  
-        
+        public int Age {get;set;}
     }
 }
